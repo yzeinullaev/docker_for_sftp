@@ -15,7 +15,7 @@ function Show-Menu {
     Write-Host "1. Start Server        - Start SFTP server" -ForegroundColor Cyan
     Write-Host "2. Stop Server         - Stop server" -ForegroundColor Cyan
     Write-Host "3. Test Connection     - Test SFTP connection" -ForegroundColor Cyan
-    Write-Host "4. Copy Keys for Laravel - Copy SSH keys" -ForegroundColor Cyan
+    Write-Host "4. Display Keys for Laravel - Show SSH keys content" -ForegroundColor Cyan
     Write-Host "5. Server Status       - Show server status" -ForegroundColor Cyan
     Write-Host "6. Show Logs           - Show server logs" -ForegroundColor Cyan
     Write-Host "0. Exit               - Exit" -ForegroundColor Yellow
@@ -130,58 +130,57 @@ function Test-SftpConnection {
 }
 
 function Copy-KeysForLaravel {
-    Write-Host "Copying SSH keys for Laravel..." -ForegroundColor Green
+    Write-Host "Displaying SSH keys for Laravel..." -ForegroundColor Green
 
-    $laravelKeysDir = "laravel-keys"
-    
     # Check source keys
     if (!(Test-Path "keys/id_rsa") -or !(Test-Path "keys/id_rsa.pub")) {
         Write-Host "SSH keys not found! Start server first." -ForegroundColor Red
         return $false
     }
 
-    # Create directory
-    if (!(Test-Path $laravelKeysDir)) {
-        New-Item -ItemType Directory -Path $laravelKeysDir | Out-Null
-        Write-Host "Created directory: $laravelKeysDir" -ForegroundColor Green
-    }
-
     try {
-        # Copy public key (always works)
-        Copy-Item "keys/id_rsa.pub" "$laravelKeysDir/id_rsa.pub" -Force
-        Write-Host "Public key copied successfully" -ForegroundColor Green
-        
-        # Try to copy private key (may require admin rights)
-        try {
-            Copy-Item "keys/id_rsa" "$laravelKeysDir/id_rsa" -Force
-            Write-Host "Private key copied successfully" -ForegroundColor Green
-        }
-        catch {
-            Write-Host "Could not copy private key (permission denied)" -ForegroundColor Yellow
-            Write-Host "Manual solution:" -ForegroundColor Cyan
-            Write-Host "1. Run PowerShell as Administrator, OR" -ForegroundColor Gray
-            Write-Host "2. Manually copy keys/id_rsa to $laravelKeysDir/id_rsa" -ForegroundColor Gray
-            Write-Host "3. Use existing keys from keys/ directory directly" -ForegroundColor Gray
-        }
-        
-        Write-Host "Keys processing completed" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "=================== PUBLIC KEY ===================" -ForegroundColor Cyan
+        Write-Host "File: keys/id_rsa.pub" -ForegroundColor Gray
+        Write-Host "Copy this content for your Laravel public key file:" -ForegroundColor Yellow
+        Write-Host ""
+        Get-Content "keys/id_rsa.pub" | Write-Host -ForegroundColor White
         
         Write-Host ""
-        Write-Host "Laravel Instructions:" -ForegroundColor Cyan
-        Write-Host "1. Copy files to your Laravel project:" -ForegroundColor Yellow
-        Write-Host "   $laravelKeysDir/id_rsa     -> storage/keys/id_rsa" -ForegroundColor Gray
-        Write-Host "   $laravelKeysDir/id_rsa.pub -> storage/keys/id_rsa.pub" -ForegroundColor Gray
+        Write-Host "================== PRIVATE KEY ===================" -ForegroundColor Cyan
+        Write-Host "File: keys/id_rsa" -ForegroundColor Gray
+        Write-Host "Copy this content for your Laravel private key file:" -ForegroundColor Yellow
+        Write-Host ""
+        try {
+            Get-Content "keys/id_rsa" | Write-Host -ForegroundColor White
+        }
+        catch {
+            Write-Host "Cannot read private key (permission denied)" -ForegroundColor Red
+            Write-Host "Run PowerShell as Administrator to view private key" -ForegroundColor Yellow
+        }
+        
+        Write-Host ""
+        Write-Host "==================================================" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "Laravel Setup Instructions:" -ForegroundColor Green
+        Write-Host "1. Create files in your Laravel project:" -ForegroundColor Yellow
+        Write-Host "   storage/keys/id_rsa     <- Copy PRIVATE KEY content" -ForegroundColor Gray
+        Write-Host "   storage/keys/id_rsa.pub <- Copy PUBLIC KEY content" -ForegroundColor Gray
         Write-Host ""
         Write-Host "2. Add to Laravel .env file:" -ForegroundColor Yellow
         Write-Host "   SFTP_HOST=localhost" -ForegroundColor Gray
         Write-Host "   SFTP_PORT=2222" -ForegroundColor Gray
         Write-Host "   SFTP_USERNAME=sftpuser" -ForegroundColor Gray
         Write-Host "   SFTP_PRIVATE_KEY_PATH=storage/keys/id_rsa" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "3. Set proper permissions in Laravel:" -ForegroundColor Yellow
+        Write-Host "   chmod 600 storage/keys/id_rsa" -ForegroundColor Gray
+        Write-Host "   chmod 644 storage/keys/id_rsa.pub" -ForegroundColor Gray
         
         return $true
         
     } catch {
-        Write-Host "Copy error: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "Error reading keys: $($_.Exception.Message)" -ForegroundColor Red
         return $false
     }
 }
