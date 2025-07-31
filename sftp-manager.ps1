@@ -147,11 +147,24 @@ function Copy-KeysForLaravel {
     }
 
     try {
-        # Copy keys
-        Copy-Item "keys/id_rsa" "$laravelKeysDir/id_rsa" -Force
+        # Copy public key (always works)
         Copy-Item "keys/id_rsa.pub" "$laravelKeysDir/id_rsa.pub" -Force
+        Write-Host "Public key copied successfully" -ForegroundColor Green
         
-        Write-Host "Keys copied to $laravelKeysDir/" -ForegroundColor Green
+        # Try to copy private key (may require admin rights)
+        try {
+            Copy-Item "keys/id_rsa" "$laravelKeysDir/id_rsa" -Force
+            Write-Host "Private key copied successfully" -ForegroundColor Green
+        }
+        catch {
+            Write-Host "Could not copy private key (permission denied)" -ForegroundColor Yellow
+            Write-Host "Manual solution:" -ForegroundColor Cyan
+            Write-Host "1. Run PowerShell as Administrator, OR" -ForegroundColor Gray
+            Write-Host "2. Manually copy keys/id_rsa to $laravelKeysDir/id_rsa" -ForegroundColor Gray
+            Write-Host "3. Use existing keys from keys/ directory directly" -ForegroundColor Gray
+        }
+        
+        Write-Host "Keys processing completed" -ForegroundColor Green
         
         Write-Host ""
         Write-Host "Laravel Instructions:" -ForegroundColor Cyan
