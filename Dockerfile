@@ -36,8 +36,5 @@ RUN ssh-keygen -A
 # Открытие порта
 EXPOSE 22
 
-# Копирование и запуск стартового скрипта
-COPY scripts/start.sh /start.sh
-RUN chmod +x /start.sh
-
-CMD ["/start.sh"]
+# Запуск SSH демона напрямую
+CMD ["/usr/sbin/sshd", "-D"]
