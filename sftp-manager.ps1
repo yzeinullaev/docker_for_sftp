@@ -151,20 +151,13 @@ function Copy-KeysForLaravel {
         Write-Host "File: keys/id_rsa" -ForegroundColor Gray
         Write-Host "Copy this content for your Laravel private key file:" -ForegroundColor Yellow
         Write-Host ""
-        try {
-            # Try PowerShell Get-Content first
-            Get-Content "keys/id_rsa" | Write-Host -ForegroundColor White
-        }
-        catch {
-            Write-Host "Opening private key in Notepad for easy copying..." -ForegroundColor Yellow
-            Start-Process notepad "keys\id_rsa"
-            Write-Host "-> Notepad opened with private key content" -ForegroundColor Green
-            Write-Host "-> Copy everything including BEGIN/END lines" -ForegroundColor Green
-            Write-Host ""
-            Write-Host "Alternative methods:" -ForegroundColor Cyan
-            Write-Host "1. Run PowerShell as Administrator" -ForegroundColor Gray
-            Write-Host "2. Use: cmd /c type keys\id_rsa" -ForegroundColor Gray
-        }
+        Write-Host "Opening private key in Notepad (secure file permissions prevent console display)" -ForegroundColor Yellow
+        Start-Process notepad "keys\id_rsa"
+        Start-Sleep 1
+        Write-Host "-> Notepad opened with FULL private key content" -ForegroundColor Green
+        Write-Host "-> Select ALL (Ctrl+A) and Copy (Ctrl+C)" -ForegroundColor Green
+        Write-Host "-> Key starts with: -----BEGIN OPENSSH PRIVATE KEY-----" -ForegroundColor Cyan
+        Write-Host "-> Key ends with:   -----END OPENSSH PRIVATE KEY-----" -ForegroundColor Cyan
         
         Write-Host ""
         Write-Host "==================================================" -ForegroundColor Cyan
