@@ -77,6 +77,30 @@ function Start-SftpServer {
     if ($LASTEXITCODE -eq 0) {
         Write-Host "SFTP server started successfully!" -ForegroundColor Green
         Show-ServerInfo
+        
+        # Automatically show keys for easy copying
+        Write-Host ""
+        Write-Host "=================== SSH KEYS FOR COPYING ===================" -ForegroundColor Cyan
+        
+        # Show public key
+        Write-Host ""
+        Write-Host "PUBLIC KEY (id_rsa.pub):" -ForegroundColor Yellow
+        Get-Content "keys/id_rsa.pub" | Write-Host -ForegroundColor White
+        
+        # Show private key from readable copy
+        Write-Host ""
+        Write-Host "PRIVATE KEY (for client connections):" -ForegroundColor Yellow
+        if (Test-Path "keys/id_rsa_readable") {
+            Get-Content "keys/id_rsa_readable" | Write-Host -ForegroundColor White
+        } else {
+            Write-Host "Readable copy not found. Use: .\sftp-manager.ps1 copy-keys" -ForegroundColor Red
+        }
+        
+        Write-Host ""
+        Write-Host "=============================================================" -ForegroundColor Cyan
+        Write-Host "Copy the PRIVATE KEY above to connect via SFTP client" -ForegroundColor Green
+        Write-Host "Connection: sftp -P 2222 -i <your_key_file> sftpuser@localhost" -ForegroundColor Gray
+        
         return $true
     } else {
         Write-Host "Startup error! Check logs: docker-compose logs" -ForegroundColor Red
