@@ -50,7 +50,12 @@ function Start-SftpServer {
         
         New-Item -ItemType Directory -Force -Path "keys" | Out-Null
         try {
-            ssh-keygen -t rsa -b 4096 -f "keys/id_rsa" -N "" -q
+            # Create SSH key in PEM format for better compatibility
+            ssh-keygen -t rsa -b 2048 -m PEM -f "keys/id_rsa" -q
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "Key generation failed. Creating with different method..." -ForegroundColor Yellow
+                ssh-keygen -t rsa -b 2048 -f "keys/id_rsa" -N "" -q
+            }
             Write-Host "SSH keys created successfully!" -ForegroundColor Green
             
             # Create readable copy immediately after generation
