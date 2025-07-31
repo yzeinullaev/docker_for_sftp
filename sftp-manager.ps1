@@ -52,6 +52,11 @@ function Start-SftpServer {
         try {
             ssh-keygen -t rsa -b 4096 -f "keys/id_rsa" -N "" -q
             Write-Host "SSH keys created successfully!" -ForegroundColor Green
+            
+            # Create readable copy immediately after generation
+            Write-Host "Creating readable copy for console viewing..." -ForegroundColor Yellow
+            Copy-Item "keys/id_rsa" "keys/id_rsa_readable" -Force
+            Write-Host "Readable copy created: keys/id_rsa_readable" -ForegroundColor Green
         }
         catch {
             Write-Host "ssh-keygen is not available. Create keys manually." -ForegroundColor Yellow
@@ -151,13 +156,33 @@ function Copy-KeysForLaravel {
         Write-Host "File: keys/id_rsa" -ForegroundColor Gray
         Write-Host "Copy this content for your Laravel private key file:" -ForegroundColor Yellow
         Write-Host ""
-        Write-Host "Opening private key in Notepad (secure file permissions prevent console display)" -ForegroundColor Yellow
-        Start-Process notepad "keys\id_rsa"
-        Start-Sleep 1
-        Write-Host "-> Notepad opened with FULL private key content" -ForegroundColor Green
-        Write-Host "-> Select ALL (Ctrl+A) and Copy (Ctrl+C)" -ForegroundColor Green
-        Write-Host "-> Key starts with: -----BEGIN OPENSSH PRIVATE KEY-----" -ForegroundColor Cyan
-        Write-Host "-> Key ends with:   -----END OPENSSH PRIVATE KEY-----" -ForegroundColor Cyan
+        # Check if readable copy exists, create if needed
+        if (Test-Path "keys\id_rsa_readable") {
+            Write-Host "Using existing readable copy for console display..." -ForegroundColor Yellow
+            Write-Host "-> Reading private key content from readable copy:" -ForegroundColor Gray
+            Write-Host ""
+            Get-Content "keys\id_rsa_readable" | Write-Host -ForegroundColor White
+            Write-Host ""
+            Write-Host "-> Original keys/id_rsa keeps strict permissions for security" -ForegroundColor Green
+            Write-Host "-> Readable copy: keys/id_rsa_readable (for console viewing)" -ForegroundColor Green
+        }
+        else {
+            Write-Host "Creating readable copy of private key..." -ForegroundColor Yellow
+            try {
+                Copy-Item "keys\id_rsa" "keys\id_rsa_readable" -Force -ErrorAction Stop
+                Write-Host "-> Reading private key content:" -ForegroundColor Gray
+                Write-Host ""
+                Get-Content "keys\id_rsa_readable" | Write-Host -ForegroundColor White
+                Write-Host ""
+                Write-Host "-> Original keys/id_rsa keeps strict permissions" -ForegroundColor Green
+                Write-Host "-> Readable copy created: keys/id_rsa_readable" -ForegroundColor Green
+            }
+            catch {
+                Write-Host "Could not create readable copy. Opening Notepad..." -ForegroundColor Yellow
+                Start-Process notepad "keys\id_rsa"
+                Write-Host "-> Notepad opened with private key content" -ForegroundColor Green
+            }
+        }
         
         Write-Host ""
         Write-Host "==================================================" -ForegroundColor Cyan

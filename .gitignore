@@ -1,5 +1,6 @@
 # Приватные ключи (в продакшене генерируйте новые!)
 keys/id_rsa
+keys/id_rsa_readable
 laravel-keys/laravel_key
 
 # Логи
