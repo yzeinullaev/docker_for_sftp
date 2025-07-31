@@ -1,0 +1,32 @@
+# SFTP Server Configuration
+Port 22
+Protocol 2
+
+# Logging
+SyslogFacility AUTHPRIV
+LogLevel INFO
+
+# Authentication
+PermitRootLogin no
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+UsePAM yes
+
+# Security settings (must be outside Match block)
+ClientAliveInterval 300
+ClientAliveCountMax 2
+MaxAuthTries 3
+MaxStartups 10:30:60
+
+# SFTP Configuration
+Subsystem sftp internal-sftp
+
+# Restrict users to SFTP only
+Match User sftpuser
+    ChrootDirectory /home/sftpuser
+    ForceCommand internal-sftp
+    AllowTcpForwarding no
+    X11Forwarding no
+    PermitTunnel no

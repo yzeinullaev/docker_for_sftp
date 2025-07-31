@@ -1,0 +1,27 @@
+# Приватные ключи (в продакшене генерируйте новые!)
+keys/id_rsa
+
+# Логи
+logs/*.log
+logs/*.out
+
+# Данные SFTP
+data/*
+!data/.gitkeep
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Временные файлы
+*.tmp
+*.temp
