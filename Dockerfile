@@ -23,7 +23,7 @@ RUN chown sftpuser:sftpuser /home/sftpuser/.ssh
 RUN chmod 700 /home/sftpuser/.ssh
 
 # Копирование публичного ключа
-COPY keys/id_rsa.pub /home/sftpuser/.ssh/authorized_keys
+COPY keys/id_ed25519.pub /home/sftpuser/.ssh/authorized_keys
 RUN chown sftpuser:sftpuser /home/sftpuser/.ssh/authorized_keys
 RUN chmod 600 /home/sftpuser/.ssh/authorized_keys
 
