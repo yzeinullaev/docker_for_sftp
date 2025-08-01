@@ -45,23 +45,23 @@ function Start-SftpServer {
     New-Item -ItemType Directory -Force -Path "logs" | Out-Null
 
     # Check SSH keys
-    if (!(Test-Path "keys/id_rsa.pub")) {
+    if (!(Test-Path "keys/id_ed25519.pub")) {
         Write-Host "Generating SSH keys..." -ForegroundColor Yellow
         
         New-Item -ItemType Directory -Force -Path "keys" | Out-Null
         try {
-            # Create SSH key in PEM format for better compatibility
-            ssh-keygen -t rsa -b 2048 -m PEM -f "keys/id_rsa" -q
+            # Create SSH key using ED25519 algorithm (more secure and modern)
+            ssh-keygen -t ed25519 -f "keys/id_ed25519" -q
             if ($LASTEXITCODE -ne 0) {
-                Write-Host "Key generation failed. Creating with different method..." -ForegroundColor Yellow
-                ssh-keygen -t rsa -b 2048 -f "keys/id_rsa" -N "" -q
+                Write-Host "ED25519 key generation failed. Creating with different method..." -ForegroundColor Yellow
+                ssh-keygen -t ed25519 -f "keys/id_ed25519" -N "" -q
             }
             Write-Host "SSH keys created successfully!" -ForegroundColor Green
             
             # Create readable copy immediately after generation
             Write-Host "Creating readable copy for console viewing..." -ForegroundColor Yellow
-            Copy-Item "keys/id_rsa" "keys/id_rsa_readable" -Force
-            Write-Host "Readable copy created: keys/id_rsa_readable" -ForegroundColor Green
+            Copy-Item "keys/id_ed25519" "keys/id_ed25519_readable" -Force
+            Write-Host "Readable copy created: keys/id_ed25519_readable" -ForegroundColor Green
         }
         catch {
             Write-Host "ssh-keygen is not available. Create keys manually." -ForegroundColor Yellow
@@ -71,8 +71,8 @@ function Start-SftpServer {
 
     # Set permissions
     Write-Host "Setting permissions..." -ForegroundColor Yellow
-    if (Test-Path "keys/id_rsa") {
-        icacls "keys/id_rsa" /inheritance:r /grant:r "$env:USERNAME:(R)" | Out-Null
+    if (Test-Path "keys/id_ed25519") {
+        icacls "keys/id_ed25519" /inheritance:r /grant:r "$env:USERNAME:(R)" | Out-Null
     }
 
     # Start container
@@ -89,14 +89,14 @@ function Start-SftpServer {
         
         # Show public key
         Write-Host ""
-        Write-Host "PUBLIC KEY (id_rsa.pub):" -ForegroundColor Yellow
-        Get-Content "keys/id_rsa.pub" | Write-Host -ForegroundColor White
+        Write-Host "PUBLIC KEY (id_ed25519.pub):" -ForegroundColor Yellow
+        Get-Content "keys/id_ed25519.pub" | Write-Host -ForegroundColor White
         
         # Show private key from readable copy
         Write-Host ""
         Write-Host "PRIVATE KEY (for client connections):" -ForegroundColor Yellow
-        if (Test-Path "keys/id_rsa_readable") {
-            Get-Content "keys/id_rsa_readable" | Write-Host -ForegroundColor White
+        if (Test-Path "keys/id_ed25519_readable") {
+            Get-Content "keys/id_ed25519_readable" | Write-Host -ForegroundColor White
         } else {
             Write-Host "Readable copy not found. Use: .\sftp-manager.ps1 copy-keys" -ForegroundColor Red
         }
@@ -139,7 +139,7 @@ function Test-SftpConnection {
     Write-Host "Container is running: $containerStatus" -ForegroundColor Green
 
     # Check keys
-    if (!(Test-Path "keys/id_rsa") -or !(Test-Path "keys/id_rsa.pub")) {
+    if (!(Test-Path "keys/id_ed25519") -or !(Test-Path "keys/id_ed25519.pub")) {
         Write-Host "SSH keys not found!" -ForegroundColor Red
         return $false
     }
@@ -167,7 +167,7 @@ function Copy-KeysForLaravel {
     Write-Host "Displaying SSH keys for Laravel..." -ForegroundColor Green
 
     # Check source keys
-    if (!(Test-Path "keys/id_rsa") -or !(Test-Path "keys/id_rsa.pub")) {
+    if (!(Test-Path "keys/id_ed25519") -or !(Test-Path "keys/id_ed25519.pub")) {
         Write-Host "SSH keys not found! Start server first." -ForegroundColor Red
         return $false
     }
@@ -175,40 +175,40 @@ function Copy-KeysForLaravel {
     try {
         Write-Host ""
         Write-Host "=================== PUBLIC KEY ===================" -ForegroundColor Cyan
-        Write-Host "File: keys/id_rsa.pub" -ForegroundColor Gray
+        Write-Host "File: keys/id_ed25519.pub" -ForegroundColor Gray
         Write-Host "Copy this content for your Laravel public key file:" -ForegroundColor Yellow
         Write-Host ""
-        Get-Content "keys/id_rsa.pub" | Write-Host -ForegroundColor White
+        Get-Content "keys/id_ed25519.pub" | Write-Host -ForegroundColor White
         
         Write-Host ""
         Write-Host "================== PRIVATE KEY ===================" -ForegroundColor Cyan
-        Write-Host "File: keys/id_rsa" -ForegroundColor Gray
+        Write-Host "File: keys/id_ed25519" -ForegroundColor Gray
         Write-Host "Copy this content for your Laravel private key file:" -ForegroundColor Yellow
         Write-Host ""
         # Check if readable copy exists, create if needed
-        if (Test-Path "keys\id_rsa_readable") {
+        if (Test-Path "keys\id_ed25519_readable") {
             Write-Host "Using existing readable copy for console display..." -ForegroundColor Yellow
             Write-Host "-> Reading private key content from readable copy:" -ForegroundColor Gray
             Write-Host ""
-            Get-Content "keys\id_rsa_readable" | Write-Host -ForegroundColor White
+            Get-Content "keys\id_ed25519_readable" | Write-Host -ForegroundColor White
             Write-Host ""
-            Write-Host "-> Original keys/id_rsa keeps strict permissions for security" -ForegroundColor Green
-            Write-Host "-> Readable copy: keys/id_rsa_readable (for console viewing)" -ForegroundColor Green
+            Write-Host "-> Original keys/id_ed25519 keeps strict permissions for security" -ForegroundColor Green
+            Write-Host "-> Readable copy: keys/id_ed25519_readable (for console viewing)" -ForegroundColor Green
         }
         else {
             Write-Host "Creating readable copy of private key..." -ForegroundColor Yellow
             try {
-                Copy-Item "keys\id_rsa" "keys\id_rsa_readable" -Force -ErrorAction Stop
+                Copy-Item "keys\id_ed25519" "keys\id_ed25519_readable" -Force -ErrorAction Stop
                 Write-Host "-> Reading private key content:" -ForegroundColor Gray
                 Write-Host ""
-                Get-Content "keys\id_rsa_readable" | Write-Host -ForegroundColor White
+                Get-Content "keys\id_ed25519_readable" | Write-Host -ForegroundColor White
                 Write-Host ""
-                Write-Host "-> Original keys/id_rsa keeps strict permissions" -ForegroundColor Green
-                Write-Host "-> Readable copy created: keys/id_rsa_readable" -ForegroundColor Green
+                Write-Host "-> Original keys/id_ed25519 keeps strict permissions" -ForegroundColor Green
+                Write-Host "-> Readable copy created: keys/id_ed25519_readable" -ForegroundColor Green
             }
             catch {
                 Write-Host "Could not create readable copy. Opening Notepad..." -ForegroundColor Yellow
-                Start-Process notepad "keys\id_rsa"
+                Start-Process notepad "keys\id_ed25519"
                 Write-Host "-> Notepad opened with private key content" -ForegroundColor Green
             }
         }
@@ -218,18 +218,18 @@ function Copy-KeysForLaravel {
         Write-Host ""
         Write-Host "Laravel Setup Instructions:" -ForegroundColor Green
         Write-Host "1. Create files in your Laravel project:" -ForegroundColor Yellow
-        Write-Host "   storage/keys/id_rsa     <- Copy PRIVATE KEY content" -ForegroundColor Gray
-        Write-Host "   storage/keys/id_rsa.pub <- Copy PUBLIC KEY content" -ForegroundColor Gray
+        Write-Host "   storage/keys/id_ed25519     <- Copy PRIVATE KEY content" -ForegroundColor Gray
+        Write-Host "   storage/keys/id_ed25519.pub <- Copy PUBLIC KEY content" -ForegroundColor Gray
         Write-Host ""
         Write-Host "2. Add to Laravel .env file:" -ForegroundColor Yellow
         Write-Host "   SFTP_HOST=localhost" -ForegroundColor Gray
         Write-Host "   SFTP_PORT=2222" -ForegroundColor Gray
         Write-Host "   SFTP_USERNAME=sftpuser" -ForegroundColor Gray
-        Write-Host "   SFTP_PRIVATE_KEY_PATH=storage/keys/id_rsa" -ForegroundColor Gray
+        Write-Host "   SFTP_PRIVATE_KEY_PATH=storage/keys/id_ed25519" -ForegroundColor Gray
         Write-Host ""
         Write-Host "3. Set proper permissions in Laravel:" -ForegroundColor Yellow
-        Write-Host "   chmod 600 storage/keys/id_rsa" -ForegroundColor Gray
-        Write-Host "   chmod 644 storage/keys/id_rsa.pub" -ForegroundColor Gray
+        Write-Host "   chmod 600 storage/keys/id_ed25519" -ForegroundColor Gray
+        Write-Host "   chmod 644 storage/keys/id_ed25519.pub" -ForegroundColor Gray
         
         return $true
         
@@ -273,11 +273,11 @@ function Show-ServerInfo {
     Write-Host "   Host: localhost" -ForegroundColor White
     Write-Host "   Port: 2222" -ForegroundColor White
     Write-Host "   User: sftpuser" -ForegroundColor White
-    Write-Host "   Key: keys/id_rsa" -ForegroundColor White
+    Write-Host "   Key: keys/id_ed25519" -ForegroundColor White
     Write-Host ""
     Write-Host "Test commands:" -ForegroundColor Cyan
     Write-Host "   .\sftp-manager.ps1 test" -ForegroundColor Gray
-    Write-Host "   sftp -P 2222 -i keys/id_rsa sftpuser@localhost" -ForegroundColor Gray
+    Write-Host "   sftp -P 2222 -i keys/id_ed25519 sftpuser@localhost" -ForegroundColor Gray
 }
 
 # Main logic

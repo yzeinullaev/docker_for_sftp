@@ -29,7 +29,7 @@ Docker-контейнер с SFTP сервером на SSH ключах.
 ## Подключение
 
 ```bash
-sftp -P 2222 -i keys/id_rsa sftpuser@localhost
+sftp -P 2222 -i keys/id_ed25519 sftpuser@localhost
 ```
 
 ## Настройки
@@ -50,19 +50,21 @@ SFTPDocker/
 ├── config/
 │   └── sshd_config         # Настройки SSH
 ├── keys/
-│   ├── id_rsa              # Приватный ключ (для подключений)
-│   ├── id_rsa.pub          # Публичный ключ
-│   └── id_rsa_readable     # Приватный ключ (для просмотра)
+│   ├── id_ed25519              # Приватный ключ ED25519 (для подключений)
+│   ├── id_ed25519.pub          # Публичный ключ ED25519
+│   └── id_ed25519_readable     # Приватный ключ (для просмотра)
 ├── laravel-keys/
-│   └── id_rsa.pub          # Копия для Laravel
+│   └── id_ed25519.pub          # Копия для Laravel
 ├── data/                   # SFTP файлы (монтируется в контейнер)
 └── logs/                   # Логи сервера
 ```
 
 ## Ключи
 
-- `keys/id_rsa` - для подключений
-- `keys/id_rsa_readable` - для просмотра
-- `keys/id_rsa.pub` - публичный
+Используются более безопасные ED25519 ключи:
+
+- `keys/id_ed25519` - приватный ключ для подключений
+- `keys/id_ed25519_readable` - копия для просмотра в консоли
+- `keys/id_ed25519.pub` - публичный ключ
 
 Приватные ключи не попадают в Git.

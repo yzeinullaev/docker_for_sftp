@@ -1,7 +1,19 @@
-# Приватные ключи (в продакшене генерируйте новые!)
+# Приватные ключи ED25519 (в продакшене генерируйте новые!)
+keys/id_ed25519
+keys/id_ed25519_readable
 keys/id_rsa
 keys/id_rsa_readable
+
+# Laravel ключи
+laravel-keys/id_ed25519
+laravel-keys/id_ed25519.pub
 laravel-keys/laravel_key
+laravel-keys/id_rsa
+laravel-keys/id_rsa.pub
+
+# Публичные ключи (опционально, если не хотите их в Git)
+# keys/id_ed25519.pub
+# keys/id_rsa.pub
 
 # Логи
 logs/*.log
@@ -13,6 +25,11 @@ data/*
 
 # Docker
 .docker/
+docker-compose.override.yml
+
+# Резервные копии
+*.bak
+*.backup
 
 # OS
 .DS_Store
